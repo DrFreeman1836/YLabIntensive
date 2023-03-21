@@ -5,55 +5,84 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Scanner;
 
 public class Sorter {
 
-  private final Integer SIZE_PART = 2;
+  private final Integer SIZE_PART = 1000;
 
-  private List<String> listParts = new ArrayList<>();
+  private Deque<File> listParts = new ArrayDeque<>();
 
   public File sortFile(File dataFile) throws IOException {
     splitFile(dataFile);
-    File result = new File("result.txt");
 
+    while (listParts.size() >= 2) {
+      File f1 = listParts.getFirst();
+      listParts.removeFirst();
+      File f2 = listParts.getFirst();
+      listParts.removeFirst();
+      listParts.addLast(mergeTwoPart(f1, f2, String.valueOf(listParts.size())));
+    }
 
-    return mergeTwoPart(new File(listParts.get(0)), new File(listParts.get(1)));
+    return listParts.getLast();
   }
 
-  private File mergeTwoPart(File file1, File file2) throws IOException {
-    File semiResult = new File("semi_result.txt");
+  private File mergeTwoPart(File file1, File file2, String name) throws IOException {
+    File semiResult = new File(name + "result.txt");
     PrintWriter writer = new PrintWriter(semiResult);
     Scanner scanner1 = new Scanner(new FileInputStream(file1));
     Scanner scanner2 = new Scanner(new FileInputStream(file2));
 
-    while (scanner1.hasNextLong()) {
-      Long value1 = scanner1.nextLong();
+    boolean v1 = true;
+    boolean v2 = true;
+    Long value1 = 0L;
+    Long value2 = 0L;
+    while (scanner1.hasNextLong() || scanner2.hasNextLong()) {
+      if (v1)
+        value1 = scanner1.hasNextLong() ? scanner1.nextLong() : Long.MAX_VALUE;
+      if (v2)
+        value2 = scanner2.hasNextLong() ? scanner2.nextLong() : Long.MAX_VALUE;
 
-      while (scanner2.hasNextLong()) {
-        Long value2 = scanner2.nextLong();
-        if (value1 >= value2) {
-          writer.println(value2);
-          continue;
-        }
+      if (value1 <= value2) {
         writer.println(value1);
-        break;
+        v2 = false;
+        v1 = true;
+      } else {
+        writer.println(value2);
+        v2 = true;
+        v1 = false;
       }
+    }
 
-      if (!scanner2.hasNextLong()) {
-       writer.println(value1);
-      }
+    if (v1 && value2 != Long.MAX_VALUE) {
+      writer.println(value2);
+    }
+    if (v2 && value1 != Long.MAX_VALUE) {
+      writer.println(value1);
     }
 
     writer.flush();
     writer.close();
-    scanner2.close();
     scanner1.close();
+    scanner2.close();
+    deletePart(file1, file2);
 
     return semiResult;
+  }
+
+  private void deletePart(File file1, File file2) {
+    try {
+      Files.delete(file1.toPath());
+      Files.delete(file2.toPath());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void splitFile(File dataFile) throws IOException {
@@ -89,7 +118,7 @@ public class Sorter {
         throw new RuntimeException(e);
       }
     });
-    listParts.add(file.getPath());
+    listParts.add(file);
     writer.flush();
     writer.close();
   }
