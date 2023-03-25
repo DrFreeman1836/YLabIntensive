@@ -10,7 +10,9 @@ public class FileSorterTest {
     DataSource dataSource = initDb();
     File data = new File("data.txt");
     FileSorter fileSorter = new FileSortImpl(dataSource);
+    long start = System.currentTimeMillis();
     File res = fileSorter.sort(data);
+    System.out.println("result - " + (System.currentTimeMillis() - start));
   }
   
   public static DataSource initDb() throws SQLException {
