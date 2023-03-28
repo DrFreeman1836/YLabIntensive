@@ -73,7 +73,10 @@ public class DbApp {
     try (java.sql.Connection connection = dataSource.getConnection();
     PreparedStatement preparedStatement = connection.prepareStatement(DELETE)) {
       preparedStatement.setLong(1, idPerson);
-      preparedStatement.execute();
+      int res = preparedStatement.executeUpdate();
+      if (res == 0) {
+        System.out.printf("id \"%s\" не найден в базе\n", idPerson);
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }

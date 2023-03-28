@@ -34,14 +34,14 @@ public class ApiApp {
         String mes = scanner.nextLine();
         String[] mesSplit = mes.split(" ");
 
-        if (mesSplit[0].equals("save") && mesSplit.length == 5) {
+        if (mesSplit[0].equals("save") && mesSplit.length == 5) {// добавление
           personApi.savePerson(Long.valueOf(mesSplit[1]), mesSplit[2], mesSplit[3], mesSplit[4]);
-        } else if (mesSplit[0].equals("delete") && mesSplit.length == 2) {
+        } else if (mesSplit[0].equals("delete") && mesSplit.length == 2) {// удаление
           personApi.deletePerson(Long.valueOf(mesSplit[1]));
-        } else if (mesSplit[0].equals("id") && mesSplit.length == 2) {
+        } else if (mesSplit[0].equals("id") && mesSplit.length == 2) {// поиск по id
           Person person = personApi.findPerson(Long.valueOf(mesSplit[1]));
           System.out.println(person);
-        } else if (mesSplit[0].equals("find") && mesSplit.length == 1) {
+        } else if (mesSplit[0].equals("find") && mesSplit.length == 1) {// вывод всех
           personApi.findAll().forEach(System.out::println);
         }
 
